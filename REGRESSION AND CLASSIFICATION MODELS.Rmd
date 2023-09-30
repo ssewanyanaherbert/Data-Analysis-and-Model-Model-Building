@@ -1,0 +1,111 @@
+---
+title: "MACHINE LEARNING MODELS"
+author: "Ssewanyana Herbert"
+date: "2023-09-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lmtest)
+library(dplyr)
+```
+```{r}
+data=read.csv('penguins.csv',header=T)
+```
+```{r}
+str(data)
+summary(data)
+```
+```{r}
+# Removing Null values
+data1=na.omit(data)
+View(data1)
+```
+```{r}
+#Selecting Predictors and Target variables
+predictors = c("bill_length_mm", "bill_depth_mm","flipper_length_mm")
+target = "body_mass_g"
+```
+```{r}
+# Creating a new dataset with only the selected columns
+data_new = data1 %>% select(all_of(c(predictors, target)))
+```
+```{r}
+# Spliting the data into training (80%) and testing (20%) sets
+set.seed(123)
+train_indices <- sample(1:nrow(data_new), 0.8 * nrow(data_new))
+train_data <- data_new[train_indices, ]
+test_data <- data_new[-train_indices, ]
+```
+$$Regression\ Model$$
+```{r}
+
+model = lm(formula = body_mass_g ~., data= train_data)
+summary(model)
+```
+```{r}
+# Making predictions on the test set
+predictions = predict(model, newdata = test_data)
+
+```
+```{r}
+# Calculating variance and SD of the predicted values
+mse = mean((predictions - test_data$body_mass_g)^2)
+rmse = sqrt(mse)
+```
+```{r}
+# Display variance and SD results of the predicted value
+
+cat("Mean Squared Error:", mse, "\n")
+cat("Root Mean Squared Error:", rmse, "\n")
+```
+$$ A\ classification\ Model$$
+```{r}
+attach(data1)
+data_new1<- data1 %>% mutate(class=ifelse(species=="Adelie","1", ifelse(species=="Gentoo","2","3")))
+predictors1 <- c("bill_length_mm", "bill_depth_mm", "body_mass_g")
+target1 <- "species"
+```
+```{r}
+data_new2 <- data_new1 %>% select(all_of(c(predictors1, target1)))
+```
+```{r}
+set.seed(123)
+train_indices <- sample(1:nrow(data_new2), 0.7 * nrow(data_new2))
+train_data1 <- data_new2[train_indices, ]
+test_data1 <- data_new2[-train_indices, ]
+```
+```{r}
+install.packages("rpart")
+library(rpart)
+```
+
+```{r}
+#Model
+
+model1 <- rpart(formula = species ~ ., data = train_data1,
+                method ="class")
+
+```
+```{r}
+# Making predictions
+predictions <- predict(model1, newdata = test_data1,
+                       type = "class")
+```
+```{r}
+#Calculating evaluation metrics the confusion matrix and  accuracy of the model
+conf_matrix <- table(test_data1$species, predictions)
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+```
+```{r}
+cat("Confusion Matrix:\n", conf_matrix, "\n")
+cat("Accuracy:", accuracy, "\n")
+```
+
+```
+

@@ -1,0 +1,49 @@
+---
+title: "Penguins Analysis"
+author: "Ssewanyana Herbert"
+date: "2023-09-19"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(dplyr)
+library(MVA)
+library(tools)
+library(ggplot2)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+penguins= read.csv("penguins.csv",header=T)
+```
+```{r}
+penguin= penguins[,-1]
+```
+```{r}
+data=na.omit(penguin)
+```
+```{r}
+species_variation=data %>% group_by(species)%>%
+  summarise(depth=mean(bill_depth_mm),
+length =mean(bill_length_mm),body_mass=mean(body_mass_g))
+species_variation
+```
+```{r}
+data_cor=cor(data[,3:6])
+data_cor
+```
+```{r}
+ggplot(data = data) +
+ geom_bar(mapping = aes(x = sex, fill = island))
+
+```
+```{r}
+Description_statistics= summary(data[,3:6])
+Description_statistics
+```
+```{r}
+Annual=data %>% group_by(year)%>% count(species)
+Annual
+```
